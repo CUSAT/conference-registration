@@ -1,18 +1,21 @@
 <?php
 /*
- * environment.php v1.3.2	-	pdweek
+ * environment.php v1.3.3	-	pdweek
  */
+
+	// Verbose output from PHP (All Errors and warnings)
+	error_reporting(E_ALL);
 
 	// Database information
 	$str_dbDomain		= (string) "localhost";
 	$str_dbUser			= (string) "username";
 	$str_dbPass			= (string) "password";
-	$str_dbDb			= (string) "database name";
+	$str_dbDb			= (string) "databaseName";
 	$str_dbCharset		= (string) "latin1";
 
 	// App Info
 	$bln_isBeta			= (bool) false;
-	$str_appVersion		= (string) '1.4.8';
+	$str_appVersion		= (string) '1.4.9';
 	$str_appLocation	= (string) "/home/200250645/public_html/staging/";
 	$str_appURL			= (string) "http://webdesign4.georgianc.on.ca/~200250645/staging/";
 

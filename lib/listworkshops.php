@@ -1,18 +1,30 @@
 <?php
 	/*
-	 * listworkshops.php v1.2.5	-	pdweek
+	 * listworkshops.php v1.2.6	-	pdweek
 	 */
 
 	if( !isset( $str_appURL ) ) {
-		require_once( '../data/environment.php' );
+		if( file_exists( '/data/environment.php' ) ) {
+			require_once( '../data/environment.php' );
+		} else if( file_exists( '../data/environment.php' ) ) {
+			require_once( '../data/environment.php' );
+		}// end if statement
 	}// end if statement
 
-	if( !function_exists(daysRemaining) ) {
-		require_once( 'releaseDate.php' );
+	if( @!function_exists(daysRemaining) ) {
+		if( file_exists( 'releaseDate.php' ) ) {
+			require_once( 'releaseDate.php' );
+		} else if( file_exists( 'lib/releaseDate.php' ) ) {
+			require_once( 'lib/releaseDate.php' );
+		}// end if statement
 	}// end if statement
 
-	if( !function_exists(echoToConsole) ) {
-		require_once( 'logging.php' );
+	if( @!function_exists(echoToConsole) ) {
+		if( file_exists( 'logging.php' ) ) {
+			require_once( 'logging.php' );
+		} else if( file_exists( 'lib/logging.php' ) ) {
+			require_once( 'lib/logging.php' );
+		}// end if statement
 	}// end if statement
 
 	/**
@@ -412,11 +424,10 @@ END;
 				  $workshopOutput .= "1:00pm College-wide Update = <strong>{$thur_keynote}</strong>\r\n\r\n<br><br>";
 				}// end if statement
 			} else {
-
+				echoToConsole( 'ResultObject was not an Object!', true );
 			}// end if statement
 
 		}// end if statement
 
 		return (string) $workshopOutput;
 	}// end of listWorkshops method
-?>

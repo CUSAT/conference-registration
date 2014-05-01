@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 	/*
-	 * registration2.php v1.6	-	pdweek
+	 * registration2.php v1.6.1	-	pdweek
 	 */
 	$flt_time_start = (float) microtime( true );
 
@@ -31,358 +31,44 @@
 		<script src="js/checkregfields.js"></script>
 		<script src="js/formControlLogic.js"></script>
 <?php
-/**
- * Get Keynote information
- */
+	// Connect to the Database
+	require_once 'lib/dbConnect.php';
 
-	// Open the database connection
-	$dbConnectionObject = @mysqli_connect( $str_dbDomain, $str_dbUser, $str_dbPass, $str_dbDb );
-	
-	// Die on connection failures. Link to mailto:$str_supportEmail with a nice interface.
-	if( mysqli_connect_error() ) {
+	// Keynote functions
+	require_once 'lib/keynotes.php';
 
-		echo '</head><body>
-		<div class="main ui-corner-bottom">';
+	// Pull keynote information from DB and initialize arrays to contain them
+	getKeynotes( $dbConnectionObject );
 
-		if( file_exists( 'pdweek.php' ) ) {
-			require_once 'pdweek.php';
-		}// end if statement
-
-		echo '			<div class="ui-widget">
-				<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-					<p>
-						<strong>Alert:</strong> Our system could not connect to the internal database.
-						This is likely because you followed an old (archived) link. If you continue to
-						reach this error page, please contact
-						<a href="mailto:' . $str_supportEmail . '" style="color: blue;">' . $str_supportEmail . '</a>
-						for further assistance.<br><br>If you are a developer, the connection error is below:
-						<span class="block upper-space lower-space left-margin">
-							<strong>Error Code</strong> ' . mysqli_connect_errno() . '<br>
-							<strong>Error</strong> ' . mysqli_connect_error() . '
-						</span>
-					</p>
-				</div><!-- ui-state-error -->
-			</div><!-- ui-widget -->
-		</div><!-- main -->
-	</body>
-</html>';
-
-		$dbConnectionObject = null;
-		unset( $dbConnectionObject );
-
-		//exit execution of the script here
-		exit();
-	}// end if statement
-
-	// Set the character set, for use with mysqli_real_escape_string
-	mysqli_set_charset( $dbConnectionObject, $str_dbCharset );
-
-	$keynoteQuery = (string) "SELECT * FROM keynotes;";
-	$keynoteResultObject = mysqli_query( $dbConnectionObject, $keynoteQuery );
-
-	if( is_object( $keynoteResultObject ) ) {
-		while( $row = mysqli_fetch_array( $keynoteResultObject ) ) {
-			extract( $row );
-
-			switch( $day ) {
-				case "mon":
-					$mon_keynote = (array) $row;
-					break;
-				case "tue":
-					$tue_keynote = (array) $row;
-					break;
-				case "wed":
-					$wed_keynote = (array) $row;
-					break;
-				case "thu":
-					$thur_keynote = (array) $row;
-					break;
-			}// end switch case statement
-		}// end while loop
-		
-		mysqli_free_result( $keynoteResultObject );
-	} else {
-		echoToConsole( "Failed query for Keynote information", true );
-	}// end if statement
+	// Populate JQuery dialog boxes ("more info" buttons) using arrays
+	showKeynotes();
 ?>
-
-		<script>
-			$(document).ready(function() {
-				var $dialog1 = $('<div></div>')
-					.html('Photos will be taken throughout the day and will be used in a conference slideshow and for other promotional purposes.')
-					.dialog({
-						autoOpen: false,
-						title: 'Photo Disclaimer'
-					});
-
-				var $dialog2 = $('<div></div>')
-					.html('The Tech Café is a collection of stations where you can informally experience many technologies that support learning. Experts at each station will share their knowledge. It will run from 10:30am - 12:15pm. Some of the stations will include: Clickers, Media Services, Library Research, Films on Demand Platform, Blackboard 9.1, Adaptive Technology.')
-					.dialog({
-						autoOpen: false,
-						title: 'The Tech Cafe'
-						});
-
-				$('#photodialog').click(function() {
-					$dialog1.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-
-				$('#tcdialog').click(function() {
-					$dialog2.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-
-				var $dialog7 = $('<div></div>')
-					.html('On Thursday from <strong>9:00am – 12:00pm</strong> we are excited to be offering various "Extraordinary Experience" opportunities at the Barrie Campus. The goal of these opportunities is to provide staff an opportunity to learn and explore the different academic areas from a "Students View" and learn more about Georgian College and some of the programs and experiences we offer our students.<br><br>If you are interested in attending please click here and you will be notified once registration opens for these sessions.')
-					.dialog({
-						autoOpen: false,
-						title: 'Extraordinary Experiences'
-						});
-
-				$('#extraordinary-experiences-info').click(function() {
-					$dialog7.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-				
-				$('#hldialog').click(function() {
-					$dialog8.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-				
-				var $dialog8 = $('<div></div>')
-					.html('The Human Library will take place at 10:30am as part of the Focus on Teaching Conference.<br><br><strong>What is the Human Library?</strong> (Definition adapted from <a href="http://humanlibrary.org">humanlibrary.org</a>)<br><br>The Human Library is an innovative experiential learning method designed to promote dialogue, reduce prejudices, build connections, and encourage understanding. It is set up as a space for dialogue and interaction. Visitors to a Human Library are given the opportunity to be "readers" though informal conversations with "people on loan". The people on loan or the "books" of the library are selected to represent student diversity. They have volunteered to share their experiences with library visitors through informal conversations. The human library has been proven to be a powerful event for breaking stereotypes and gaining insight into the rich and diverse lived experiences of the people in our classrooms.')
-					.dialog({
-						autoOpen: false,
-						title: 'The Human Library'
-						});
-
-<?php
-	if( isset( $mon_keynote ) ) {
-		$mon_keynote['speaker'] = stripslashes( $mon_keynote['speaker'] );
-		$mon_keynote['description'] = stripslashes( $mon_keynote['description'] );
-		$mon_keynote['time'] = stripslashes( $mon_keynote['time'] );
-		$mon_keynote['seats'] = stripslashes( $mon_keynote['seats'] );
-		$mon_keynote['location'] = stripslashes( $mon_keynote['location'] );
-		
-		echo <<<END
-
-				var \$dialog3 = \$('<div></div>')
-					.html("<strong>Speaker</strong>: {$mon_keynote['speaker']}<br><strong>Description:</strong> {$mon_keynote['description']}<br><strong>Time</strong>: {$mon_keynote['time']}<br><strong>Seats Remaining</strong>: {$mon_keynote['seats']}<br><strong>Location:</strong> {$mon_keynote['location']}")
-					.dialog({
-						autoOpen: false,
-						title: '{$mon_keynote['title']}'
-						});
-
-				\$('#mon-keynote-info').click(function() {
-					\$dialog3.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-
-END;
-	} else {
-		$noMondayKeynote = (bool) true;
-		echoToConsole( "No Monday Keynote found", false );
-	}// end if statement
-
-	/**
-	 * Tuesday Keynote
-	 */
-	if( isset( $tue_keynote ) ) {
-		$tue_keynote['speaker'] = stripslashes( $tue_keynote['speaker'] );
-		$tue_keynote['description'] = stripslashes( $tue_keynote['description'] );
-		$tue_keynote['time'] = stripslashes( $tue_keynote['time'] );
-		$tue_keynote['seats'] = stripslashes( $tue_keynote['seats'] );
-		$tue_keynote['location'] = stripslashes( $tue_keynote['location'] );
-
-		echo <<<END
-
-				var \$dialog4 = \$('<div></div>')
-					.html("<strong>Speaker</strong>: {$tue_keynote['speaker']}<br><strong>Description:</strong> {$tue_keynote['description']}<br><strong>Time</strong>: {$tue_keynote['time']}<br><strong>Seats Remaining</strong>: {$tue_keynote['seats']}<br><strong>Location:</strong> {$tue_keynote['location']}")
-					.dialog({
-						autoOpen: false,
-						title: '{$tue_keynote['title']}'
-						});
-
-				\$('#tue-keynote-info').click(function() {
-					\$dialog4.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-
-END;
-	} else {
-		$noTuesdayKeynote = (bool) true;
-		echoToConsole( "No Tuesday Keynote found", false );
-	}// end if statement
-
-	/**
-	 * Wednesday Keynote
-	 */
-	if( isset( $wed_keynote ) ) {
-		$wed_keynote['speaker'] = stripslashes( $wed_keynote['speaker'] );
-		$wed_keynote['description'] = stripslashes( $wed_keynote['description'] );
-		$wed_keynote['time'] = stripslashes( $wed_keynote['time'] );
-		$wed_keynote['seats'] = stripslashes( $wed_keynote['seats'] );
-		$wed_keynote['location'] = stripslashes( $wed_keynote['location'] );
-		
-		echo <<<END
-
-				var \$dialog5 = \$('<div></div>')
-					.html("<strong>Speaker</strong>: {$wed_keynote['speaker']}<br><strong>Description:</strong> {$wed_keynote['description']}<br><strong>Time</strong>: {$wed_keynote['time']}<br><strong>Seats Remaining</strong>: {$wed_keynote['seats']}<br><strong>Location:</strong> {$wed_keynote['location']}")
-					.dialog({
-						autoOpen: false,
-						title: '{$wed_keynote['title']}'
-						});
-
-				\$('#wed-keynote-info').click(function() {
-					\$dialog5.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-
-END;
-	} else {
-		$noWednesdayKeynote = (bool) true;
-		echoToConsole( "No Wednesday Keynote found", false );
-	}// end if statement
-	
-	/**
-	 * Thursday Keynote
-	 */
-	if( isset( $thur_keynote ) ) {
-		$thur_keynote['speaker'] = stripslashes( $thur_keynote['speaker'] );
-		$thur_keynote['description'] = stripslashes( $thur_keynote['description'] );
-		$thur_keynote['time'] = stripslashes( $thur_keynote['time'] );
-		$thur_keynote['seats'] = stripslashes( $thur_keynote['seats'] );
-		$thur_keynote['location'] = stripslashes( $thur_keynote['location'] );
-		
-		/**
-		 * Test if seats full
-		 */
-		$thursdayKeynoteFull = (bool) false;
-		if( $thur_keynote['seats'] < 1 ) {
-			$thursdayKeynoteFull = (bool) true;
-		}// end if statement (Seats full)
-
-		echo <<<END
-
-				var \$dialog6 = \$('<div></div>')
-					.html("<strong>Speaker</strong>: {$thur_keynote['speaker']}<br><strong>Description:</strong> {$thur_keynote['description']}<br><strong>Time</strong>: {$thur_keynote['time']}<br><strong>Seats Remaining</strong>: {$thur_keynote['seats']}<br><strong>Location:</strong> {$thur_keynote['location']}")
-					.dialog({
-						autoOpen: false,
-						title: '{$thur_keynote['title']}'
-						});
-
-				\$('#thur-keynote-info').click(function() {
-					\$dialog6.dialog('open');
-					// prevent the default action, e.g., following a link
-					return false;
-				});
-
-END;
-	} else {
-		$noThursdayKeynote = (bool) true;
-		echoToConsole( "No Thursday Keynote found", false );
-	}// end if statement
-?>
-			});
-		</script>
 	</head>
 	<body>
 <?php
+	require_once 'lib/init.php';
 
-	error_reporting(E_ALL);
-
-	if (isset($_GET['r'])) {
-		$check = filter_input( INPUT_GET, 'r', FILTER_SANITIZE_MAGIC_QUOTES );
-	} else {
-		$check = "";
-	}
-	
-	if (strlen($check) == 16) {
-		$check = substr($check, 0, 15);
-	}
-
-	$lastname = $firstname = $email = $registered = $dept = $otherdept = $lunch = $techcafe = $amworkshop = $pmworkshop = $userid = '';
-
-	$prevfound = 1;
-	if ($check != "") {
-		$checkforprev = "select * from users where validate2='" . $check . "'";
-
-		$result = mysqli_query( $dbConnectionObject, $checkforprev );
-
-		$alreadyregistered = 0;
-		if (mysqli_num_rows($result) == 0) {
-			$prevfound = 0;
-		} else {
-			$row = mysqli_fetch_array($result);
-			extract($row);
-
-			$selectw = "select mon_amworkshop, mon_pmworkshop, tue_amworkshop, tue_pmworkshop, wed_amworkshop, wed_pmworkshop, wed_pmworkshop2, thur_amworkshop, thur_pmworkshop from registered where userid=$userid";
-			$resultw = mysqli_query( $dbConnectionObject, $selectw );
-
-			//Initialize 'registered' table if userid does not exist there.
-			if (mysqli_num_rows($resultw) == 0) {
-				$mon_amworkshop = $tue_amworkshop = $wed_amworkshop = $thur_amworkshop = (int) 100;
-				$mon_pmworkshop = $tue_pmworkshop = $wed_pmworkshop = $wed_pmworkshop2 = $thur_pmworkshop = (int) 101;
-				$initializeRegistered_query = "insert into registered (userid, mon_amworkshop, mon_pmworkshop, tue_amworkshop, tue_pmworkshop, wed_amworkshop, wed_pmworkshop, wed_pmworkshop2, thur_amworkshop, thur_pmworkshop) values ($userid, 100, 101, 100, 101, 100, 101, 101, 100, 101)";
-
-				$initializeRegistered_result = mysqli_query( $dbConnectionObject, $initializeRegistered_query );
-
-				if( $initializeRegistered_result == false ) {
-					echoToConsole( "Failed to initialize registered table!", true );
-				}// end if statement
-			} else {
-				$row = mysqli_fetch_array($resultw);
-				extract($row);		
-			}
-
-			//Initialize 'fotcAttendees' table if userid does not exist there.
-			$checkFoTC_query = "SELECT choice FROM fotcAttendees WHERE userid=$userid;";
-			$checkFoTC_result = mysqli_query( $dbConnectionObject, $checkFoTC_query );
-
-			if( mysqli_num_rows( $checkFoTC_result ) == 0 ) {
-				$initializeFotc_query = "INSERT INTO fotcAttendees(userid,choice) VALUES($userid,'$fotc');";
-				$initializeFotc_result = mysqli_query( $dbConnectionObject, $initializeFotc_query );
-
-				if( $initializeFotc_result == false ) {
-					echoToConsole( "Failed to initialize FoTC Attendees table!", true );
-				}// end if statement
-			}// end if statement
-
-			//Set the 'review' flag in the users table
-			$setReviewQuery = "UPDATE users SET review='yes' WHERE userid=$userid;";
-			$setReviewResult = mysqli_query( $dbConnectionObject, $setReviewQuery );
-
-			if( $setReviewResult == false ) {
-				echoToConsole( "Failed to set review flag.", true );
-			}// end if statement
+	if( isset( $userProfile ) ) {
+		if( isset( $userProfile[0] ) ) {
+			extract($userProfile[0]);	//user's profile
 		}// end if statement
 	} else {
-		$prevfound = 0;
-	}
-	?>
-		<div class="main ui-corner-bottom">
-
-<?php include "pdweek.php"; ?>
-
-<?php
-if ($prevfound == 0) {
+		//user's sessions
+		if( isset( $userProfile[1] ) ) {
+			extract($userProfile[1]);
+		} else {
+			$mon_amworkshop = $tue_amworkshop = $wed_amworkshop = $thur_amworkshop = (int) 100;
+			$mon_pmworkshop = $tue_pmworkshop = $wed_pmworkshop = $wed_pmworkshop2 = $thur_pmworkshop = (int) 101;
+		}// end if statement
+	}// end if statement
 ?>
-			<div class="ui-widget">
-				<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-					<p><span class="ui-icon ui-icon-alert" style="float: left; margin-right: .3em;"></span> 
-						<strong>Alert:</strong> Our system has indicated that you have not completed Part 1 of the registration process. Please go back to the <a href="index.php" style="color: blue;">Registration Page</a> to begin the process. If you continue to get this error, please contact <a href="<?=$str_supportEmail;?>" style="color: blue;"><?=$str_supportEmail;?></a> for technical support. Thank you.</p>
-				</div><!-- ui-state-error -->
-			</div><!-- ui-widget -->
+		<div class="main ui-corner-bottom">
 <?php
-} else {
+	include "pdweek.php";
 
+	if ($prevfound == 0) {
+		showPrettyError( '<strong>Alert:</strong> Our system has indicated that you have not completed Part 1 of the registration process. Please go back to the <a href="index.php" style="color: blue;">Registration Page</a> to begin the process. If you continue to get this error, please contact <a href="' . $str_supportEmail . '" style="color: blue;">' . $str_supportEmail . '</a> for technical support. Thank you.', 'error', true );
+	} else {
 ?>		
 			<h3>Session Registration</h3>
 			<p>If you have any questions or problems regarding the session registrations, please contact <a href="mailto:<?=$str_supportEmail;?>"><?=$str_supportEmail;?></a></p>
@@ -471,8 +157,8 @@ if ($prevfound == 0) {
 			echo "								<option value=\"$departmentListItem\" selected>$departmentListItem</option>\n";
 		} else {
 			echo "								<option value=\"$departmentListItem\">$departmentListItem</option>\n";
-		}
-	}
+		}// end if statement
+	}// end foreach loop
 	?>
 							</select>
 							<input class="regControl input-text" type="text" id="otherdept" name="otherdept" width="150" maxlength="80" value="<?php echo htmlentities( stripslashes($otherdept) ); ?>" onClick="lastEntered=this.value; this.value='';" onBlur="this.value=!this.value?lastEntered:this.value;">
@@ -501,7 +187,7 @@ if ($prevfound == 0) {
 								<div class="upper-space lower-space">
 									<div class="ui-state-info">
 <?php
-if( !isset( $noMondayKeynote ) ) {
+if( !isset( $GLOBALS['noMondayKeynote'] ) ) {
 ?>
 										<span class="block">Will you be attending the Board of Governor&#96;s Awards &#38; Keynote?</span>
 		<?php if ($mon_keynote == "yes") { ?>
@@ -938,7 +624,7 @@ END;
 							<h3>Wednesday, April 30th  - PD Sessions</h3>
 							<div class="subordinateRegbox">
 <?php
-if( !isset( $noWednesdayKeynote ) ) {
+if( !isset( $GLOBALS['noWednesdayKeynote'] ) ) {
 ?>
 								<div class="lower-space ui-state-info">
 									<span class="block">Will you be attending Wednesday's Keynote?</span>
@@ -1246,15 +932,14 @@ if( !isset( $noWednesdayKeynote ) ) {
 			$n += 1;
 		}
 
-		if( !isset( $noThursdayKeynote ) ) {
+		if( !isset( $GLOBALS['noThursdayKeynote'] ) ) {
 ?>
 								<span class="regboxtitle upper-space">Starting in the Afternoon (1:00pm)</span>
-
 								<div class="upper-space lower-space">
 									<div class="ui-state-info">
 										<span class="block">Will you be attending the College-wide update?</span>
 <?php
-			if( !$thursdayKeynoteFull ) {
+			if( !$GLOBALS['thursdayKeynoteFull'] ) {
 				if ($thur_keynote == "yes") {
 					echo '										<label><input id="thur_keynote" type="radio" name="thur_keynote" value="yes" checked>Yes</label> <label><input id="thur_keynote" type="radio" name="thur_keynote" value="no">No</label>';
 				} else {
@@ -1264,13 +949,7 @@ if( !isset( $noWednesdayKeynote ) ) {
 				echo '<p><strong>(We\'re sorry, but the seats are FULL)</strong></p>';
 			}// end if statement
 ?>
-
-										<span class="block upper-space lower-space">
-											<strong>Time: </strong> 1:00pm-2:00pm (Doors Open at 12:30pm)<br>
-											<strong>Speaker: </strong>President & CEO MaryLynn West-Moynes<br>
-											<strong>Location: Alumni Hall/Barrie Campus</strong><br><br>
-											<strong>Note: </strong><em>The college-wide update will be live streamed to the other campus locations for those employees who cannot attend at the Barrie campus and details will be provided as we get closer to the event.</em>
-										</span>
+										<button id="thur-keynote-info">More Info</button><br>
 									</div><!-- ui-state-info -->
 								</div><!-- spacer -->
 							</div><!-- subordinateRegbox -->
@@ -1285,10 +964,8 @@ if( !isset( $noWednesdayKeynote ) ) {
 					<p style="text-align: right">
 						<input type="submit" value="Submit" class="button-green">
 					</p>
-
 				</form>
 			</div><!-- formbox2 -->
-
 <?php
 		
 } // end if statement (prevfound=0)

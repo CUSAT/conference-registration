@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <?php
 	/*
-	 * register1-regopen.php	v1.3	-	pdweek
+	 * register1-regopen.php v1.4	-	pdweek
 	 */
 
-	 require_once( "data/environment.php" );
+	 require_once( 'data/environment.php' );
+	 require_once( 'lib/prettyErrors.php' );
 ?>
 <html lang="en">
 	<head>
@@ -20,7 +21,6 @@
 	</head>
 	<body>
 <?php
-error_reporting(E_ALL);
 
 if( !isset( $_POST['emailnew'] ) ) {
 	$emailnew = "";
@@ -47,16 +47,16 @@ if( !isset( $_POST['emailnew'] ) ) {
 
 	$checkforprev = "select email from users where email='" . $emailsl . "'";
 
-	mysql_connect("$str_dbDomain", "$str_dbUser", "$str_dbPass");
-	$db = mysql_select_db("$str_dbDb");
+	// Connect to the Database
+	require_once 'lib/dbConnect.php';
 
-	$result = mysql_query($checkforprev);
+	$result = mysqli_query( $dbConnectionObject, $checkforprev );
 }// end if statement
 
 $prevfound = 0;
 if( $emailnew == "" ) {
 	// Bypass email and record insert..
-} else if (mysql_num_rows($result) >0) {
+} else if (mysqli_num_rows($result) >0) {
 	$prevfound = 1;
 } else {
 	$randomizingstring = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890";
@@ -103,29 +103,29 @@ if( $emailnew == "" ) {
 						. "'" . $emailsl . "','" . $checkingstring . "',"
 						. "now(), 'yes', 'no', 'yes', 'no', 'no', 'no', 'no', 'no', 'no'"
 					. ");";
-		$insertResult = mysql_query($insert);
+		$insertResult = mysqli_query( $dbConnectionObject, $insert );
 
 		if( is_bool( $insertResult ) ) {
 			if( $insertResult === false ) {
-				echo '<p>An error occurred while initializing the user\'s "user" table!<br>' . mysql_error();
+				echo '<p>An error occurred while initializing the user\'s "user" table!<br>' . mysqli_error();
 			}// end if statement
 		}// end if statement
 
 		$select = "select userid from users where email='$emailsl'";
-		$result = mysql_query($select);
-		$row = mysql_fetch_array($result);
+		$result = mysqli_query( $dbConnectionObject, $select );
+		$row = mysqli_fetch_array( $result );
 		extract($row);
 
 		//Initialize user's "registered" table
 		$insertr = "insert into registered (userid, mon_amworkshop, mon_pmworkshop, tue_amworkshop, tue_pmworkshop, wed_amworkshop, wed_pmworkshop, wed_pmworkshop2, thur_amworkshop, thur_pmworkshop) values ($userid, 100, 101, 100, 101, 100, 101, 101, 100, 101)";
-		mysql_query($insertr);
+		mysqli_query( $dbConnectionObject, $insertr );
 
 		//Initialize user's "fotcAttendees" table
 		$insertFotc = "insert into fotcAttendees (userid, choice) values ($userid, 'yes')";
-		mysql_query($insertFotc);
+		mysqli_query( $dbConnectionObject, $insertFotc );
 
 		//Close the Database connection
-		mysql_close();
+		mysqli_close( $dbConnectionObject );
 	} else {
 		//Initialize user's "user" table
 		$insert = "insert into users (firstname, lastname, email, validate2, regdate) values("
@@ -133,10 +133,10 @@ if( $emailnew == "" ) {
 					. "'" . $emailsl . "','" . $checkingstring . "',"
 					. "now());";
 
-		mysql_query($insert);
+		mysqli_query( $dbConnectionObject, $insert );
 
 		//Close the Database connection
-		mysql_close();
+		mysqli_close( $dbConnectionObject );
 	}// end if statement
 }// end if statement
 ?>
@@ -146,11 +146,7 @@ if( $emailnew == "" ) {
 
 <?php
 if ($emailnew == "") {
-	echo( '			<div class="ui-widget">
-				<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;">
-					<p><strong>Alert:</strong> You did not specify a valid eMail address. Cannot continue.</p>
-				</div>
-			</div>' );
+	showPrettyError( '<strong>Alert:</strong> You did not specify a valid eMail address. Please go back to the <a href="index.php" style="color: blue;">Registration Page</a> to begin the process from the beginning.<br><br>If you continue to receive this error, please email <a href="mailto:' . $str_emailReplyTo . '" style="color: blue;">' . $str_emailReplyTo . '</a> for technical support. Thank you.', 'error', true );
 
 } else if ($prevfound == 0) {
 ?>
@@ -177,13 +173,7 @@ if ($emailnew == "") {
 			</div>
 <?php
 } else {
-?>
-			<div class="ui-widget">
-				<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-					<p><strong>Alert:</strong> The username you have entered is already registered in our system.  Please check your email for your personal profile registration link. If you have any questions, please email <a href="mailto:<?=$str_emailReplyTo;?>"><?=$str_emailReplyTo;?></a>. Thank you.</p>
-				</div>
-			</div>
-<?php	
+	showPrettyError( '<strong>Alert:</strong> The username you have entered is already registered in our system.  Please check your email for your personal profile registration link. If you continue to receive this error, please email <a href="mailto:' . $str_emailReplyTo . '" style="color: blue;">' . $str_emailReplyTo . '</a> for technical support. Thank you.', 'error', true );
 }// end if statement
 ?>
 		</div>

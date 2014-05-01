@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <?php
 	/*
-	 * index.php v1.3.4	-	pdweek
+	 * index.php v1.3.5	-	pdweek
 	 */
 
 	require_once( 'data/environment.php' );
@@ -26,45 +26,6 @@
 		<div class="main ui-corner-bottom">
 <?php
 	include "pdweek.php";
-	$usersQuery = "select userid from users";
-
-	// Open the database connection
-	$dbConnectionObject = @mysqli_connect( $str_dbDomain, $str_dbUser, $str_dbPass, $str_dbDb );
-	
-	// Die on connection failures. Link to mailto:$str_supportEmail with a nice interface.
-	if( mysqli_connect_error() ) {
-
-		echo '			<div class="ui-widget">
-				<div class="ui-state-error ui-corner-all" style="padding: 0 .7em;"> 
-					<p>
-						<strong>Alert:</strong> Our system could not connect to the internal database.
-						This is likely because you followed an old (archived) link. If you continue to
-						reach this error page, please contact
-						<a href="mailto:' . $str_supportEmail . '" style="color: blue;">' . $str_supportEmail . '</a>
-						for further assistance.<br><br>If you are a developer, the connection error is below:
-						<span class="block upper-space lower-space left-margin">
-							<strong>Error Code</strong> ' . mysqli_connect_errno() . '<br>
-							<strong>Error</strong> ' . mysqli_connect_error() . '
-						</span>
-					</p>
-				</div>
-			</div></div></body></html>';
-
-		$dbConnectionObject = null;
-		unset( $dbConnectionObject );
-
-		//exit execution of the script here
-		exit();
-	}// end if statement
-
-	//Set the character set, for use with mysqli_real_escape_string
-	mysqli_set_charset( $dbConnectionObject, $str_dbCharset );
-
-	//Query the Database
-	$usersResultObject = mysqli_query( $dbConnectionObject, $usersQuery );
-
-	//Close the Database connection
-	mysqli_close( $dbConnectionObject );
 
 	if( !$ctlMember ) {
 ?>
