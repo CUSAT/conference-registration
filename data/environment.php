@@ -34,4 +34,4 @@
 	$str_regOpening		= (string) "Friday, April 11th at 10:30am";
 	$str_regDeadline	= (string) "April 23rd";
 	$str_pdweekName		= (string) "PD Week";
-	$str_confHashtag	= (string) "#GCPDWeek";
+	$str_confHashtag	= (string) "#fotc2014";

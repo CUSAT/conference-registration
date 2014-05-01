@@ -1,6 +1,6 @@
 <?php
 	/*
-	 * pdweek.php	-	pdweek v1.4
+	 * pdweek.php v0.2	-	pdweek
 	 */
 ?>
 			<h1 style="color: #005A8A; margin-top: 0px; padding-top: 10px"><?=$str_pdweekName;?> <?=$str_currentYear;?></h1>

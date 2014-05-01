@@ -1,6 +1,6 @@
 <?php
 	/*
-	 * fotc.php	-	pdweek v1.4
+	 * fotc.php v0.1	-	pdweek
 	 */
 ?>
 			<div style="margin: 20px; background-color: #ddd; padding: 20px" class="rounded-corner">
