@@ -2,7 +2,7 @@
 
 <?php
 	/*
-	 * register3.php v1.3.7	-	pdweek
+	 * register3.php v1.3.7.101	-	pdweek
 	 */
 	$flt_time_start = (float) microtime( true );	
 
@@ -142,14 +142,14 @@ if( isset( $_POST['wed_keynote'] ) ) {
 	$wed_keynoteIn = '';
 }
 
-if (isset($_POST['thu_amworkshop'])) {
-	$thur_amworkshop = $_POST['thu_amworkshop'];
+if (isset($_POST['thur_amworkshop'])) {
+	$thur_amworkshop = $_POST['thur_amworkshop'];
 } else {
 	$thur_amworkshop = 100;
 }
 
-if (isset($_POST['thu_pmworkshop'])) {
-	$thur_pmworkshop = $_POST['thu_pmworkshop'];
+if (isset($_POST['thur_pmworkshop'])) {
+	$thur_pmworkshop = $_POST['thur_pmworkshop'];
 } else {
 	$thur_pmworkshop = 101;	
 }

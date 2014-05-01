@@ -1,6 +1,6 @@
 <?php
 	/*
-	 * listworkshops.php v1.2.6	-	pdweek
+	 * listworkshops.php v1.3.101	-	pdweek
 	 */
 
 	if( !isset( $str_appURL ) ) {
@@ -26,6 +26,80 @@
 			require_once( 'lib/logging.php' );
 		}// end if statement
 	}// end if statement
+
+	
+	function enumerateSessions( &$dbConnectionObject, $str_timeIn, $str_dayIn, $str_startTimeClause, $int_defaultID, $int_selectedID, $str_columnName ) {
+		global $mon_amworkshop, $mon_pmworkshop, $tue_amworkshop, $tue_pmworkshop, $wed_amworkshop, $wed_pmworkshop, $wed_pmworkshop2, $thur_amworkshop, $thur_pmworkshop;
+
+		$select = (string) "SELECT * FROM workshops WHERE time='{$str_timeIn}' AND day='{$str_dayIn}' AND datediff(now(), release_date)>=0 AND {$str_startTimeClause} OR workshopid=$int_defaultID ORDER BY title;";
+
+		$result = mysqli_query( $dbConnectionObject, $select );
+
+		if( is_bool( $result ) ) {
+			echoToConsole( "Failed to query for workshops!", true );
+		}// end if statement
+
+		$workshopsStillOpen = 0;
+		$n = 1;
+		$n2 = mysqli_num_rows($result);
+		while ($row = mysqli_fetch_array($result))
+		{
+			extract($row);
+
+			$select2 = "select userid from registered where {$str_columnName}={$workshopid}";
+			$result2 = mysqli_query( $dbConnectionObject, $select2 );
+			
+			if( is_bool( $result2 ) ) {
+				echoToConsole( "Failed to query user's workshop selection", true );
+			}// end if statement
+			
+			$registered = mysqli_num_rows($result2);
+			$seatsleft = $seats - $registered;
+			
+			$title = stripslashes($title);
+			$description = stripslashes($description);
+			
+			$dclasses = "";
+			if ($n == 1) {
+				$dclasses .= "borderall ";
+			} elseif ($n == $n2) {
+				$dclasses .= "borderend ";
+			} else {
+				$dclasses .= "bordernotop ";
+			}
+			if ($workshopid == $int_selectedID) {
+				$dclasses .= "wselected ";
+			} else {
+				if ($seatsleft == 0) {
+					$dclasses .= "wfull ";
+				}
+			}
+			echo "									<div class=\"left-margin {$dclasses}\">\n";
+			if ($seatsleft <= 0) {
+				if ($workshopid == $int_selectedID) {
+					echo "										<input type=\"radio\" name=\"{$str_columnName}\" value=\"" . $workshopid . "\" checked> <strong>(FULL) " . $title . "</strong>\n";
+				} else {
+					echo "										<strong>(FULL) $title</strong>";
+				}								
+			} else {
+				if ($workshopid == $int_selectedID) {
+					echo "										<input type=\"radio\" name=\"{$str_columnName}\" value=\"" . $workshopid . "\" checked> <strong>" . $title . "</strong>\n";
+				} else {
+					echo "										<input type=\"radio\" name=\"{$str_columnName}\" value=\"" . $workshopid . "\"> <strong>" . $title . "</strong>\n";
+				}
+			}
+			if ($workshopid == $int_defaultID) {
+				echo "										No session selected for this time slot\n";
+			} else {
+				echo '										<br><strong>Presenter(s):  ' .  $presenter . '</strong>
+										<br><strong>Seats left = ' . $seatsleft . '</strong>
+										<br><strong>Location = ' . $room . '</strong>
+										<br><br>' . $description . "\n";
+			}
+			echo "									</div><!-- sessionContainer -->\n";
+			$n += 1;
+		}// end of while loop
+	}// end enumerateSessions() function
 
 	/**
 	 * Given a userID, the listWorkshops function will print out the

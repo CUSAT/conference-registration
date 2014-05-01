@@ -232,150 +232,18 @@ if( !isset( $GLOBALS['noMondayKeynote'] ) ) {
 									</div><!-- ui-state-info -->
 								</div><!-- spacer -->
 
+<?php require_once( 'lib/listworkshops.php' ); ?>
+
 								<span class="regboxtitle">Concurrent Sessions (Starting in the Afternoon)</span>
 								<span class="block left-margin lower-space">Please select a session from the list below.</span>
-	<?php
-		$select = "SELECT * FROM workshops WHERE time='AM' AND day='mon' AND datediff(now(), release_date)>=0 AND (start_time='1:00pm') OR workshopid=100 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Monday AM workshops!", true );
-		}// end if statement
-
-		$workshopsStillOpen = 0;
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-			
-			$select2 = "select userid from registered where mon_amworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Monday AM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-			
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $mon_amworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $mon_amworkshop) {
-					echo "										<input type=\"radio\" name=\"mon_amworkshop\" value=\"" . $workshopid . "\" checked> <strong>(FULL) " . $title . "</strong>\n";
-				} else {
-					echo "										<strong>(FULL) $title</strong>";
-				}								
-			} else {
-				if ($workshopid == $mon_amworkshop) {
-					echo "										<input type=\"radio\" name=\"mon_amworkshop\" value=\"" . $workshopid . "\" checked> <strong>" . $title . "</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"mon_amworkshop\" value=\"" . $workshopid . "\"> <strong>" . $title . "</strong>\n";
-				}
-			}
-			if ($workshopid == 100) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' .  $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><strong>Location = ' . $room . '</strong>
-										<br><br>' . $description . "\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}// end of while loop
-	?>
+<?php
+	enumerateSessions( $dbConnectionObject, 'AM', 'mon', "(start_time='1:00pm')", 100, $userProfile[1]['mon_amworkshop'], 'mon_amworkshop' );
+?>
 									<span class="regboxtitle">Concurrent Sessions (Starting at: 2:30pm)</span>
 									<span class="block left-margin lower-space">Please select a session from the list below.</span>
-	<?php
-		$select = "SELECT * FROM workshops WHERE time='PM' AND day='mon' AND datediff(now(), release_date)>=0 AND (start_time='2:30pm') OR workshopid=101 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Monday PM workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-
-			$select2 = "select userid from registered where mon_pmworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Monday PM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $mon_pmworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $mon_pmworkshop) {
-					echo "										<input type=\"radio\" name=\"mon_pmworkshop\" value=\"" . $workshopid . "\" checked> <strong>(FULL) $title</strong>\n";
-				} else {
-					echo "										<strong>(FULL) $title</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $mon_pmworkshop) {
-					echo "										<input type=\"radio\" name=\"mon_pmworkshop\" value=\"" . $workshopid . "\" checked> <strong>$title</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"mon_pmworkshop\" value=\"" . $workshopid . "\"> <strong>$title</strong>\n";
-				}
-			}
-			if ($workshopid == 101) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><strong>Location = ' . $room . '</strong>
-										<br><br>' . $description . "\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
-	?>
+<?php
+	enumerateSessions( $dbConnectionObject, 'PM', 'mon', "(start_time='2:30pm')", 101, $userProfile[1]['mon_pmworkshop'], 'mon_pmworkshop' );
+?>
 							</div><!-- subordinateRegbox -->
 							<!-- End Monday Workshops -->
 
@@ -417,9 +285,7 @@ END;
 		} else {
 			echo( "										<label><input id=\"attendFotc\" type=\"radio\" name=\"attendFotc\" value=\"yes\">Yes</label> <label><input id=\"attendFotc\" type=\"radio\" name=\"attendFotc\" value=\"no\" checked>No</label><br>\n" );
 		}// end if statement
-
-		echo <<<END
-
+?>
 									<br><span class="block lower-space left-margin"><em>The Focus on Teaching Conference includes:
 									<ul>
 										<li>Keynote at 9:00am</li>
@@ -428,155 +294,15 @@ END;
 									</ul>
 									<strong>Note:</strong> If you choose Yes, you will receive an email once session registration is open.</em></span>
 								</div><!-- ui-state-info: FoTC -->
-
 								<span class="regboxtitle">Concurrent Sessions (From 1:15pm to 2:15pm)</span>
 								<span class="block left-margin lower-space">Please select a session from the list below.</span>
-
-END;
-
-		if( $tueDaysRemaining == 0 )
-		$select = "SELECT * FROM workshops WHERE time='AM' AND day='tue' AND datediff(now(), release_date)>=0 AND (start_time='1:15pm') OR workshopid=100 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Tuesday AM workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-			
-			$select2 = "select userid from registered where tue_amworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Tuesday AM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-			
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $tue_amworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $tue_amworkshop) {
-					echo "										<input type=\"radio\" name=\"tue_amworkshop\" value=\"" . $workshopid . "\" checked> <strong>(FULL) {$title}</strong>\n";
-				} else {
-					echo "										<strong>(FULL) {$title}</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $tue_amworkshop) {
-					echo "										<input type=\"radio\" name=\"tue_amworkshop\" value=\"" . $workshopid . "\" checked> <strong>{$title}</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"tue_amworkshop\" value=\"" . $workshopid . "\"> <strong>{$title}</strong>\n";
-				}
-			}
-			if ($workshopid == 100) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><br>' . "{$description}\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
-
-		echo <<<END
-
+<?php
+			enumerateSessions($dbConnectionObject, 'AM', 'tue', "(start_time='1:15pm')", 100, $userProfile[1]['tue_amworkshop'], 'tue_amworkshop' );
+?>
 									<span class="regboxtitle">Concurrent Sessions (From 2:30pm to 3:30pm)</span>
 									<span class="block left-margin lower-space">Please select a session from the list below.</span>
-
-END;
-
-		$select = "SELECT * FROM workshops WHERE time='PM' AND day='tue' AND datediff(now(), release_date)>=0 AND (start_time='2:30pm') OR workshopid=101 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Tuesday PM workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-
-			$select2 = "select userid from registered where tue_pmworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Tuesday PM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $tue_pmworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $tue_pmworkshop) {
-					echo "										<input type=\"radio\" name=\"tue_pmworkshop\" value=\"{$workshopid}\" checked> <strong>(FULL) {$title}</strong>\n";
-				} else {
-					echo "										<strong>(FULL) {$title}</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $tue_pmworkshop) {
-					echo "										<input type=\"radio\" name=\"tue_pmworkshop\" value=\"{$workshopid}\" checked> <strong>{$title}</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"tue_pmworkshop\" value=\"{$workshopid}\"> <strong>{$title}</strong>\n";
-				}
-			}
-			if ($workshopid == 101) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><br>' . "{$description}\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
+<?php
+			enumerateSessions( $dbConnectionObject, 'PM', 'tue', "(start_time='2:30pm')", 101, $userProfile[1]['tue_pmworkshop'], 'tue_pmworkshop' );
 	} else {
 		echoToConsole( "FoTC workshops have not yet been released. Days remaining: {$tueDaysRemaining}", true );
 
@@ -640,219 +366,19 @@ if( !isset( $GLOBALS['noWednesdayKeynote'] ) ) {
 ?>
 								<span class="regboxtitle">Concurrent Sessions (Starting in the Morning)</span>
 								<span class="block left-margin lower-space">Please select a session from the list below.</span>
-	<?php
-		$select = "SELECT * FROM workshops WHERE time='AM' AND day='wed' AND datediff(now(), release_date)>=0 AND (start_time='9:00am' OR start_time='9:30am' OR start_time='10:00am' OR start_time='10:30am' OR start_time='11:00am' OR start_time='11:30am') OR workshopid=100 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Wednesday AM workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-			
-			$select2 = "select userid from registered where wed_amworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Wednesday AM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-			
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $wed_amworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin $dclasses\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $wed_amworkshop) {
-					echo "										<input type=\"radio\" name=\"wed_amworkshop\" value=\"" . $workshopid . "\" checked> <strong>(FULL) $title</strong>\n";
-				} else {
-					echo "										<strong>(FULL) $title</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $wed_amworkshop) {
-					echo "										<input type=\"radio\" name=\"wed_amworkshop\" value=\"" . $workshopid . "\" checked> <strong>$title</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"wed_amworkshop\" value=\"" . $workshopid . "\"> <strong>$title</strong>\n";
-				}
-			}
-			if ($workshopid == 100) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><strong>Location = ' . $room . '</strong>
-										<br><br>' . "{$description}\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
-	?>
+<?php
+	enumerateSessions( $dbConnectionObject, 'AM', 'wed', "(start_time='9:00am' OR start_time='9:30am' OR start_time='10:00am' OR start_time='10:30am' OR start_time='11:00am' OR start_time='11:30am')", 100, $userProfile[1]['wed_amworkshop'], 'wed_amworkshop' );
+?>
 									<span class="regboxtitle">Concurrent Sessions (Starting in the Afternoon)</span>
 									<span class="block left-margin lower-space">Please select a session from the list below.</span>
-	<?php
-		$select = "SELECT * FROM workshops WHERE time='PM' AND day='wed' AND datediff(now(), release_date)>=0 AND (start_time='12:00pm' OR start_time='12:30pm' OR start_time='1:00pm' OR start_time='1:30pm' OR start_time='2:00pm') OR workshopid=101 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Wednesday PM workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-
-			$select2 = "select userid from registered where wed_pmworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Wednesday PM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $wed_pmworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $wed_pmworkshop) {
-					echo "										<input type=\"radio\" name=\"wed_pmworkshop\" value=\"{$workshopid}\" checked> <strong>(FULL) {$title}</strong>\n";
-				} else {
-					echo "										<strong>(FULL) {$title}</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $wed_pmworkshop) {
-					echo "										<input type=\"radio\" name=\"wed_pmworkshop\" value=\"{$workshopid}\" checked> <strong>{$title}</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"wed_pmworkshop\" value=\"{$workshopid}\"> <strong>{$title}</strong>\n";
-				}
-			}
-			if ($workshopid == 101) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><strong>Location = ' . $room . '</strong>
-										<br><br>' . "{$description}\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
-	?>
+<?php
+	enumerateSessions( $dbConnectionObject, 'PM', 'wed', "(start_time='12:00pm' OR start_time='12:30pm' OR start_time='1:00pm' OR start_time='1:30pm' OR start_time='2:00pm')", 101, $userProfile[1]['wed_pmworkshop'], 'wed_pmworkshop' );
+?>
 									<span class="regboxtitle">Concurrent Sessions (Starting at: 2:30pm)</span>
 									<span class="block left-margin lower-space">Please select a session from the list below.</span>
-	<?php
-		$select = "SELECT * FROM workshops WHERE time='PM' AND day='wed' AND datediff(now(), release_date)>=0 AND start_time='2:30pm' OR workshopid=101 ORDER BY title;";
-
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Wednesday PM-2 workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-
-			$select2 = "select userid from registered where wed_pmworkshop2={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Wednesday PM-2 workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $wed_pmworkshop2) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $wed_pmworkshop2) {
-					echo "										<input type=\"radio\" name=\"wed_pmworkshop2\" value=\"{$workshopid}\" checked> <strong>(FULL) {$title}</strong>\n";
-				} else {
-					echo "										<strong>(FULL) {$title}</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $wed_pmworkshop2) {
-					echo "										<input type=\"radio\" name=\"wed_pmworkshop2\" value=\"{$workshopid}\" checked> <strong>{$title}</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"wed_pmworkshop2\" value=\"{$workshopid}\"> <strong>{$title}</strong>\n";
-				}
-			}
-			if ($workshopid == 101) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><strong>Location = ' . $room . '</strong>
-										<br><br>' . "{$description}\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
+<?php
+	$select = "SELECT * FROM workshops WHERE time='PM' AND day='wed' AND datediff(now(), release_date)>=0 AND start_time='2:30pm' OR workshopid=101 ORDER BY title;";
+	enumerateSessions( $dbConnectionObject, 'PM', 'wed', "start_time='2:30pm'", 101, $userProfile[1]['wed_pmworkshop2'], 'wed_pmworkshop2' )
 ?>
 							</div><!-- subordinateRegbox -->
 							<!-- End Wednesday Workshops -->
@@ -863,76 +389,9 @@ if( !isset( $GLOBALS['noWednesdayKeynote'] ) ) {
 								<span class="regboxtitle">Concurrent Sessions (Starting in the Morning)</span>
 								<span class="block left-margin lower-space">Please select a session from the list below.</span>
 <?php
-		$select = "SELECT * FROM workshops WHERE time='AM' AND day='thu' AND datediff(now(), release_date)>=0 AND (start_time='9:00am' OR start_time='9:30am' OR start_time='10:00am' OR start_time='10:30am' OR start_time='11:00am' OR start_time='11:30am') OR workshopid=100 ORDER BY title;";
+	enumerateSessions( $dbConnectionObject, 'AM', 'thu', "(start_time='9:00am' OR start_time='9:30am' OR start_time='10:00am' OR start_time='10:30am' OR start_time='11:00am' OR start_time='11:30am')", 100, $userProfile[1]['thur_amworkshop'], 'thur_amworkshop' );
 
-		$result = mysqli_query( $dbConnectionObject, $select );
-		$workshopsStillOpen = 0;
-		
-		if( is_bool( $result ) ) {
-			echoToConsole( "Failed to query for Thursday AM workshops!", true );
-		}// end if statement
-		
-		$n = 1;
-		$n2 = mysqli_num_rows($result);
-		while ($row = mysqli_fetch_array($result))
-		{
-			extract($row);
-			
-			$select2 = "select userid from registered where thur_amworkshop={$workshopid}";
-			$result2 = mysqli_query( $dbConnectionObject, $select2 );
-			
-			if( is_bool( $result2 ) ) {
-				echoToConsole( "Failed to query user's Thursday AM workshop selection", true );
-			}// end if statement
-			
-			$registered = mysqli_num_rows($result2);
-			$seatsleft = $seats - $registered;
-			
-			$title = stripslashes($title);
-			$description = stripslashes($description);
-			
-			$dclasses = "";
-			if ($n == 1) {
-				$dclasses .= "borderall ";
-			} elseif ($n == $n2) {
-				$dclasses .= "borderend ";
-			} else {
-				$dclasses .= "bordernotop ";
-			}
-			if ($workshopid == $thur_amworkshop) {
-				$dclasses .= "wselected ";
-			} else {
-				if ($seatsleft == 0) {
-					$dclasses .= "wfull ";
-				}
-			}
-			echo "									<div class=\"left-margin {$dclasses}\">\n";
-			if ($seatsleft <= 0) {
-				if ($workshopid == $thur_amworkshop) {
-					echo "										<input type=\"radio\" name=\"thu_amworkshop\" value=\"{$workshopid}\" checked> <strong>(FULL) {$title}</strong>\n";
-				} else {
-					echo "										<strong>(FULL) {$title}</strong>\n";
-				}								
-			} else {
-				if ($workshopid == $thur_amworkshop) {
-					echo "										<input type=\"radio\" name=\"thu_amworkshop\" value=\"{$workshopid}\" checked> <strong>{$title}</strong>\n";
-				} else {
-					echo "										<input type=\"radio\" name=\"thu_amworkshop\" value=\"{$workshopid}\"> <strong>{$title}</strong>\n";
-				}
-			}
-			if ($workshopid == 100) {
-				echo "										No session selected for this time slot\n";
-			} else {
-				echo '										<br><strong>Presenter(s):  ' . $presenter . '</strong>
-										<br><strong>Seats left = ' . $seatsleft . '</strong>
-										<br><strong>Location = ' . $room . '</strong>
-										<br><br>' . "{$description}\n";
-			}
-			echo "									</div><!-- workshopContainer -->\n";
-			$n += 1;
-		}
-
-		if( !isset( $GLOBALS['noThursdayKeynote'] ) ) {
+	if( !isset( $GLOBALS['noThursdayKeynote'] ) ) {
 ?>
 								<span class="regboxtitle upper-space">Starting in the Afternoon (1:00pm)</span>
 								<div class="upper-space lower-space">
@@ -940,13 +399,15 @@ if( !isset( $GLOBALS['noWednesdayKeynote'] ) ) {
 										<span class="block">Will you be attending the College-wide update?</span>
 <?php
 			if( !$GLOBALS['thursdayKeynoteFull'] ) {
+				echo '<span class="left-margin">';
 				if ($thur_keynote == "yes") {
 					echo '										<label><input id="thur_keynote" type="radio" name="thur_keynote" value="yes" checked>Yes</label> <label><input id="thur_keynote" type="radio" name="thur_keynote" value="no">No</label>';
 				} else {
 					echo '										<label><input id="thur_keynote" type="radio" name="thur_keynote" value="yes">Yes</label> <label><input id="thur_keynote" type="radio" name="thur_keynote" value="no" checked>No</label>';
 				}// end if statement
+				echo '</span>';
 			} else {
-				echo '<p><strong>(We\'re sorry, but the seats are FULL)</strong></p>';
+				echo '<span class="left-margin"><strong>(We\'re sorry, but the seats are FULL)</strong></span> ';
 			}// end if statement
 ?>
 										<button id="thur-keynote-info">More Info</button><br>
